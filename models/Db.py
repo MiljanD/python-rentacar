@@ -11,7 +11,5 @@ class Db:
             database="oop_2"
         )
 
-
     def _get_connection(self):
         return self.__connection
-

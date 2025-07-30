@@ -1,7 +1,6 @@
 
 
 class Car:
-
     cars = {
         "AUDI": [{"model": "A4", "production_year": 2004},
                  {"model": "A5", "production_year": 2004},
@@ -20,13 +19,9 @@ class Car:
         self.__model = None
         self.__production_year = None
 
-
-
-
     @property
     def model(self):
         return self.__model
-
 
     @model.setter
     def model(self, model):
@@ -44,11 +39,9 @@ class Car:
             if car_model["model"] == model.upper():
                 self.__production_year = car_model["production_year"]
 
-
     @property
     def production_year(self):
         return self.__production_year
-
 
     @production_year.setter
     def production_year(self, year):
@@ -60,20 +53,17 @@ class Car:
 
         self.__production_year = year
 
-
     @property
     def brand(self):
         return self.__brand
 
-
     @brand.setter
     def brand(self, brand):
         valid_brands = [brand for brand, model in Car.cars.items()]
-        if brand.upper() not in valid_brands :
+        if brand.upper() not in valid_brands:
             raise ValueError(f"{brand.upper()} brand is not available.")
 
         self.__brand = brand.upper()
-
 
 
 audi = Car()
