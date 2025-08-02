@@ -1,6 +1,6 @@
 import pymysql
 
-
+# Db class responsible to make connection to database
 class Db:
 
     def __init__(self):

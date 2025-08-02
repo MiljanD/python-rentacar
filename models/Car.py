@@ -3,7 +3,10 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 
 
+# Car class is responsible to ensure all necessary functionalities and options for car section of the program
+
 class Car(Db):
+    # initial dict of available cars not needed any more since all of them are in database
     cars = {
         "AUDI": [{"model": "A4", "production_year": 2004, "rented": False, "rented_until": None},
                  {"model": "A5", "production_year": 2004, "rented": False, "rented_until": None},
@@ -24,10 +27,12 @@ class Car(Db):
         self.__model = None
         self.__production_year = None
 
+    # property of class Car which represent model of specific car brand
     @property
     def model(self):
         return self.__model
 
+    # setter for model property of specific car brand
     @model.setter
     def model(self, model):
         if self.__brand is None:
@@ -35,11 +40,12 @@ class Car(Db):
 
         self.__model = model.upper()
 
-
+    # property of class Car which represent production year of specific car brand
     @property
     def production_year(self):
         return self.__production_year
 
+    # setter for production year property of specific car brand
     @production_year.setter
     def production_year(self, year):
         if self.__model is None:
@@ -50,16 +56,24 @@ class Car(Db):
 
         self.__production_year = year
 
+    # property of class Car which represent specific car brand
     @property
     def brand(self):
         return self.__brand
 
+    # setter for specific car brand property
     @brand.setter
     def brand(self, brand):
         self.__brand = brand.upper()
 
 
+    # method for displaying all cars in our rent a car agency
     def show_all_cars(self):
+        """
+        by querying the database, we are getting list of all cars which is passed to
+        show_cars method
+
+        """
         cursor = self.con.cursor()
         cursor.execute("SELECT * FROM cars")
         results = cursor.fetchall()
@@ -68,6 +82,9 @@ class Car(Db):
 
 
     def show_cars(self, car_list):
+        """ Is used to print data from passed car_list
+        :param car_list: is list of dictionaries extracted from database
+        """
         car_brands = []
         for brand in car_list:
             if brand["brand"] not in car_brands:
@@ -91,6 +108,9 @@ class Car(Db):
 
 
     def add_car(self):
+        """
+        Method that enable us to add new car to out fleet
+        """
         cursor = self.con.cursor()
         query = ("INSERT INTO cars (brand, model, production_year, is_rented, rented_until)"
                  "VALUES (%s, %s, %s, %s, %s)")
@@ -100,39 +120,51 @@ class Car(Db):
 
 
     def rent_car(self, brand_name):
+        """
+        Method that enable option of renting the specific car(brand/model)
+        :param brand_name: parameter that is passed by user and represents specific car brand
+        """
         cursor = self.con.cursor()
         cursor.execute("SELECT * FROM cars WHERE brand = %s AND is_rented = %s", (brand_name, False))
         self.con.commit()
         results = cursor.fetchall()
 
-        self.show_cars(results)
-
-        model_id = None
-        rented = True
-        model_choice = input("Chose model from the list: ")
-
-        for model in results:
-            if model["model"] == model_choice:
-                if not model["is_rented"]:
-                    model_id = model["id"]
-                    rented = False
-
-        if not model_id:
-            print("You have chose incorrect model.")
+        if not results:
+            print("Chosen brand name is not available.")
         else:
-            if rented:
-                print("Model is already rented.")
-            else:
-                days_of_rent = int(input("Number of renting days: "))
-                current_date = datetime.now()
-                rent_expiration = current_date + relativedelta(days=days_of_rent)
+            self.show_cars(results)
 
-                cursor.execute("UPDATE cars SET is_rented = %s, rented_until = %s WHERE id=%s", (True, rent_expiration, model_id))
-                self.con.commit()
-                cursor.close()
+            model_id = None
+            rented = True
+            model_choice = input("Chose model from the list: ")
+
+            for model in results:
+                if model["model"] == model_choice:
+                    if not model["is_rented"]:
+                        model_id = model["id"]
+                        rented = False
+
+            if not model_id:
+                print("You have chose incorrect model.")
+            else:
+                if rented:
+                    print("Model is already rented.")
+                else:
+                    days_of_rent = int(input("Number of renting days: "))
+                    current_date = datetime.now()
+                    rent_expiration = current_date + relativedelta(days=days_of_rent)
+
+                    cursor.execute("UPDATE cars SET is_rented = %s, rented_until = %s WHERE id=%s", (True, rent_expiration, model_id))
+                    self.con.commit()
+                    cursor.close()
 
 
     def return_from_rent(self):
+        """
+        Method that checks whether renting of specific car is finished and restarts
+        database records of is_rented and rented_until to default values
+
+        """
         cursor = self.con.cursor()
         cursor.execute("SELECT * FROM cars WHERE is_rented = TRUE")
         self.con.commit()
@@ -150,6 +182,10 @@ class Car(Db):
 
 
     def show_rented_cars(self):
+        """
+        Method that displays rented car list by using show_car method
+
+        """
         cursor = self.con.cursor()
         cursor.execute("SELECT * FROM cars WHERE is_rented = %s", True)
         self.con.commit()
@@ -161,6 +197,10 @@ class Car(Db):
 
 
     def show_available_cars(self):
+        """
+        Method that displays available car list by using show_car method
+
+        """
         cursor = self.con.cursor()
         cursor.execute("SELECT * FROM cars WHERE is_rented = %s", False)
         self.con.commit()
@@ -172,7 +212,8 @@ class Car(Db):
 
 
 
-#
+# This method is commented since it was used only to populate database from initial available cars dictionary
+
 #     def add_cars_from_list(self):
 #         cursor = self.con.cursor()
 #         for brand, models in Car.cars.items():
@@ -183,9 +224,4 @@ class Car(Db):
 #                 cursor.execute(query, (brand, model["model"], model["production_year"], model["rented"], model["rented_until"]))
 #                 self.con.commit()
 #         cursor.close()
-#
-#
-#
-# if __name__ == "__main__":
-#     car = Car()
-#     car.add_cars_from_list()
+
