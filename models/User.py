@@ -2,9 +2,12 @@ from models.Db import Db
 
 
 class User(Db):
+
+    ALL_USERS = []
+
     def __init__(self):
         super().__init__()
-
+        self.con = self._get_connection()
         self.__name = None
         self.__age = None
 
@@ -24,17 +27,35 @@ class User(Db):
         return self.__name
 
     @name.setter
-    def name(self, name):
-        if len(name) < 3:
-            raise ValueError("Name must be at least 3 characters long")
+    def name(self, new_name):
+        split_name = new_name.split()
+        if len(split_name) < 2:
+            raise ValueError("Name must be in format first last name")
 
-        self.__name = name
+        self.__name = new_name
 
 
-toma = User()
+    def create(self):
+        if self.__name is None or self.__age is None:
+            raise ValueError("Name or age are not set.")
 
-toma.name = "Tomislav"
-print(toma.name)
+        first_name = self.__name.split()[0].capitalize()
+        last_name = self.__name.split()[1].capitalize()
 
-toma.age = 18
-print(toma.age)
+        cursor = self.con.cursor()
+        query = "INSERT INTO users (first_name, last_name, age) VALUES (%s, %s, %s)"
+        cursor.execute(query, (first_name, last_name, self.__age))
+        self.con.commit()
+        cursor.close()
+
+    def show_users(self):
+        cursor = self.con.cursor()
+        cursor.execute("SELECT * FROM users")
+        self.con.commit()
+
+        results = cursor.fetchall()
+        cursor.close()
+        for idx, result in enumerate(list(results)):
+            print(f"{idx + 1 }. {result["first_name"]} {result["last_name"]}, {result["age"]} years old.")
+
+
