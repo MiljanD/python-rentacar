@@ -102,8 +102,13 @@ class Car(Db):
                         if "day" in expiration_in:
                             expiration_in = f"{expiration_in[:6].strip(",")}"
                         else:
-                            expiration_in = f"{expiration_in[:2]} hours and {expiration_in[3:5]} minutes"
+                            print(expiration_in)
+                            if expiration_in[1] != ":":
+                                expiration_in = f"{expiration_in[:2]} hours and {expiration_in[3:5]} minutes"
+                            else:
+                                expiration_in = f"{expiration_in[0]} hours and {expiration_in[2:4]} minutes"
                         rented = f"Model is still rented for {expiration_in}"
+
                     print(f"    * Model: {model["model"]} - Year of production: {model["production_year"]} - {rented}.")
 
 
